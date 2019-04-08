@@ -24,7 +24,7 @@ class Assembler {
     let directives = [
         ".Integer",
         ".String"]
-    func assemble(_ assembly:String) throws -> (bin:[Int], lst:String) {
+    func assemble(_ assembly:String) throws -> (bin:[Int], lst:String, sym:String) {
         var start:Int? = nil
         var lst:[(lst:String, isLabel:Bool)] = []
         var result : [Int] = []
@@ -32,78 +32,81 @@ class Assembler {
         symbolTable = [:]
         for lineNum in 0..<lines.count {
             lst.append(("\(result.count): ", false))
-            var thisLine = lines[lineNum].components(separatedBy: " ")
-            if !commands.keys.contains(thisLine[0]) && !directives.contains(thisLine[0]) {
-                let symbol = String(thisLine[0].dropLast())
-                guard !symbolTable.keys.contains(symbol) else {
-                    throw CompilerError("Symbol \(symbol) already exists.", lineNum)
-                }
-                lst[lineNum].isLabel = true
-                addSymbol(symbol, result.count)
-                thisLine.remove(at: 0)
-            }
-            if let command = commands[thisLine[0]] {
-                if start == nil {start = result.count}
-                result.append(command.bin)
-                do {
-                    switch command.argType {
-                    case .lr:
-                        let l0 = try checkLineForL(thisLine, 1, lineNum)
-                        result.append(l0)
-                        let r1 = try checkLineForR(thisLine, 2, lineNum)
-                        result.append(r1)
-                        break
-                    case .l:
-                        let l0 = try checkLineForL(thisLine, 1, lineNum)
-                        result.append(l0)
-                        lst[lineNum].lst += "\(l0) "
-                        break
-                    case .r:
-                        let r0 = try checkLineForR(thisLine, 1, lineNum)
-                        result.append(r0)
-                        lst[lineNum].lst += "\(r0) "
-                        break
-                    case .rr:
-                        let r0 = try checkLineForR(thisLine, 1, lineNum)
-                        result.append(r0)
-                        lst[lineNum].lst += "\(r0) "
-                        let r1 = try checkLineForR(thisLine, 2, lineNum)
-                        result.append(r1)
-                        lst[lineNum].lst += "\(r1) "
-                        break
-                    case .none: break
+            var thisLine = lines[lineNum].components(separatedBy: ";").first!.components(separatedBy: " ").filter({$0 != ""})
+            if thisLine.count > 0 {
+                if !commands.keys.contains(thisLine[0]) && !directives.contains(thisLine[0]) {
+                    let symbol = String(thisLine[0].dropLast())
+                    guard !symbolTable.keys.contains(symbol) else {
+                        throw CompilerError("Symbol \(symbol) already exists.", lineNum)
                     }
-                } catch {
-                    throw error
+                    lst[lineNum].isLabel = true
+                    addSymbol(symbol, result.count)
+                    thisLine.remove(at: 0)
                 }
-            } else {
-                switch thisLine[0] {
-                case directives[0]:
-                    if let lInt = Int(thisLine[1].dropFirst()) {
-                        lst[lineNum].lst += "\(lInt) "
-                        result.append(lInt)
+                if !(thisLine.count > 0) {break}
+                if let command = commands[thisLine[0]] {
+                    if start == nil {start = result.count}
+                    result.append(command.bin)
+                    do {
+                        switch command.argType {
+                        case .lr:
+                            let l0 = try checkLineForL(thisLine, 1, lineNum)
+                            result.append(l0)
+                            let r1 = try checkLineForR(thisLine, 2, lineNum)
+                            result.append(r1)
+                            break
+                        case .l:
+                            let l0 = try checkLineForL(thisLine, 1, lineNum)
+                            result.append(l0)
+                            lst[lineNum].lst += "\(l0) "
+                            break
+                        case .r:
+                            let r0 = try checkLineForR(thisLine, 1, lineNum)
+                            result.append(r0)
+                            lst[lineNum].lst += "\(r0) "
+                            break
+                        case .rr:
+                            let r0 = try checkLineForR(thisLine, 1, lineNum)
+                            result.append(r0)
+                            lst[lineNum].lst += "\(r0) "
+                            let r1 = try checkLineForR(thisLine, 2, lineNum)
+                            result.append(r1)
+                            lst[lineNum].lst += "\(r1) "
+                            break
+                        case .none: break
+                        }
+                    } catch {
+                        throw error
                     }
-                    break
-                case directives[1]:
-                    var string = assembly.components(separatedBy: "\n")[lineNum].components(separatedBy: """
+                } else {
+                    switch thisLine[0] {
+                    case directives[0]:
+                        if let lInt = Int(thisLine[1].dropFirst()) {
+                            lst[lineNum].lst += "\(lInt) "
+                            result.append(lInt)
+                        }
+                        break
+                    case directives[1]:
+                        var string = assembly.components(separatedBy: "\n")[lineNum].components(separatedBy: """
 "
 """)[1]
-                    result.append(string.count)
-                    for char in string.unicodeScalars {
-                        lst[lineNum].lst += "\(char.value ) "
-                        result.append(Int(char.value))
+                        result.append(string.count)
+                        for char in string.unicodeScalars {
+                            lst[lineNum].lst += "\(char.value ) "
+                            result.append(Int(char.value))
+                        }
+                        break
+                    default: break
                     }
-                    break
-                default: break
                 }
             }
             lst[lineNum].lst = fitToLeft(15, lst[lineNum].lst) + "     "
             lst[lineNum].lst += !lst[lineNum].isLabel ? "    " : ""
-            lst[lineNum].lst += lines[lineNum]
+            lst[lineNum].lst += lines[lineNum].components(separatedBy: " ").filter({$0 != ""}).reduce("", {$0 + "\($1) "})
         }
         result.insert(result.count, at: 0)
-        result.insert(start!, at: 1)
-        return (result, lst.reduce("", {$0 + "\($1.lst)\n"}))
+        result.insert(start ?? 0, at: 1)
+        return (result, lst.reduce("", {$0 + "\($1.lst)\n"}), symbolTable.reduce("", {"\($0) \($1.key): \($1.value)\n"}))
     }
     func checkLineForR(_ line:[String],_ argNum: Int, _ lineNum: Int) throws -> Int {
         guard line.indices.contains(argNum) else {
@@ -137,17 +140,17 @@ class Assembler {
         case none
     }
     func fitToLeft(_ length: Int, _ str: String) -> String{
-            if str.count > length {
-                return String(str.dropLast(str.count-length))
-            } else if (str.count < length) {
-                var result = str
-                for _ in str.count..<length {
-                    result += " "
-                }
-                return result
-            } else {
-                return str
+        if str.count > length {
+            return String(str.dropLast(str.count-length))
+        } else if (str.count < length) {
+            var result = str
+            for _ in str.count..<length {
+                result += " "
             }
+            return result
+        } else {
+            return str
+        }
     }
 }
 

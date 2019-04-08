@@ -69,8 +69,9 @@ SAP Help:
             let assembled = try ass.assemble(fileContents)
             try assembled.bin.reduce("", {$0 + String($1) + "\n"}).write(to: URL(fileURLWithPath: input[1] + ".bin", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
             try assembled.lst.write(to: URL(fileURLWithPath: input[1] + ".lst", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
+            try assembled.sym.write(to: URL(fileURLWithPath: input[1] + ".sym", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
         } catch {
-            try! "\((error as! CompilerError).message) Line \((error as! CompilerError).line).".write(to: try! URL(fileURLWithPath: input[1] + ".lst", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
+            try! "\((error as! CompilerError).message) Line \((error as! CompilerError).line).".write(to: URL(fileURLWithPath: input[1] + ".lst", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
         }
     }
     func run() {
@@ -109,12 +110,36 @@ SAP Help:
         filePath = newFilePath
     }
     func printlst() {
-        
+        guard input.count == 2 else {
+            print("Printlst takes 1 arg. printlst <program name>")
+            return
+        }
+        do {
+            try print(String(contentsOf: URL(fileURLWithPath: input[1] + ".lst", isDirectory: false, relativeTo: filePath)))
+        } catch {
+            print("Invalid filename.")
+        }
     }
     func printbin() {
-        
+        guard input.count == 2 else {
+            print("Printbin takes 1 arg. printlst <program name>")
+            return
+        }
+        do {
+            try print(String(contentsOf: URL(fileURLWithPath: input[1] + ".bin", isDirectory: false, relativeTo: filePath)))
+        } catch {
+            print("Invalid filename.")
+        }
     }
     func printsym() {
-        
+        guard input.count == 2 else {
+            print("Printsym takes 1 arg. printlst <program name>")
+            return
+        }
+        do {
+            try print(String(contentsOf: URL(fileURLWithPath: input[1] + ".sym", isDirectory: false, relativeTo: filePath)))
+        } catch {
+            print("Invalid filename.")
+        }
     }
 }
