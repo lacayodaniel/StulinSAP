@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		96BA2C57225ACAE800C58451 /* SAP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BA2C56225ACAE800C58451 /* SAP.swift */; };
+		96BA2C59225ACFDB00C58451 /* VM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BA2C58225ACFDB00C58451 /* VM.swift */; };
+		96BA2C5B225AE52B00C58451 /* Assembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BA2C5A225AE52B00C58451 /* Assembler.swift */; };
 		C2FA3E55225533A80001FBE1 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FA3E54225533A80001FBE1 /* main.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +26,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		96BA2C56225ACAE800C58451 /* SAP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAP.swift; sourceTree = "<group>"; };
+		96BA2C58225ACFDB00C58451 /* VM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VM.swift; sourceTree = "<group>"; };
+		96BA2C5A225AE52B00C58451 /* Assembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assembler.swift; sourceTree = "<group>"; };
 		C2FA3E51225533A80001FBE1 /* StulinSAP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StulinSAP; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2FA3E54225533A80001FBE1 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +64,9 @@
 			isa = PBXGroup;
 			children = (
 				C2FA3E54225533A80001FBE1 /* main.swift */,
+				96BA2C56225ACAE800C58451 /* SAP.swift */,
+				96BA2C5A225AE52B00C58451 /* Assembler.swift */,
+				96BA2C58225ACFDB00C58451 /* VM.swift */,
 			);
 			path = StulinSAP;
 			sourceTree = "<group>";
@@ -119,7 +128,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96BA2C5B225AE52B00C58451 /* Assembler.swift in Sources */,
+				96BA2C57225ACAE800C58451 /* SAP.swift in Sources */,
 				C2FA3E55225533A80001FBE1 /* main.swift in Sources */,
+				96BA2C59225ACFDB00C58451 /* VM.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
