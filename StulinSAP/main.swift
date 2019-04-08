@@ -8,6 +8,5 @@
 
 import Foundation
 
-print("master!")
-print("butts!")
-
+let sap = SAP()
+sap.runUI()
