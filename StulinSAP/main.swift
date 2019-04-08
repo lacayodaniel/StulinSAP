@@ -9,5 +9,3 @@
 import Foundation
 
 print("master!")
-print("butts!")
-
