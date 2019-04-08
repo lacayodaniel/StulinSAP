@@ -61,7 +61,15 @@ SAP Help:
             print("Need to set URL first")
             return
         }
-        
+        guard let fileContents = try? String(contentsOf: URL(fileURLWithPath: input[1] + ".txt", isDirectory: false, relativeTo: filePath)) else {
+            print("Invalid filename")
+            return
+        }
+        do {
+            try ass.assemble(fileContents).reduce("", {$0 + String($1) + "\n"}).write(to: URL(fileURLWithPath: input[1] + ".bin", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
+        } catch {
+            print((error as! CompilerError).message)
+        }
     }
     func run() {
         guard input.count == 2 else {
@@ -72,15 +80,14 @@ SAP Help:
             print("Need to set URL first")
             return
         }
-        var fileContents = [""]
-        do {
-            print(URL(fileURLWithPath: input[1], isDirectory: false, relativeTo: filePath).absoluteString)
-            try fileContents = FileManager.default.contentsOfDirectory(atPath: URL(fileURLWithPath: input[1], isDirectory: false, relativeTo: filePath).absoluteString ?? "")
-        } catch {
+        guard let fileContents = try? String(contentsOf: URL(fileURLWithPath: input[1] + ".bin", isDirectory: false, relativeTo: filePath)) else {
             print("Invalid filename")
             return
         }
-        print(fileContents)
+        vm.memory = fileContents.components(separatedBy: "\n").map{Int($0)}.compactMap{$0}
+        print("Running file \(URL(fileURLWithPath: input[1], isDirectory: false, relativeTo: filePath).absoluteString)")
+        vm.setRunning()
+        vm.runVM()
     }
     func path() {
         guard input.count == 2 else {
@@ -90,7 +97,7 @@ SAP Help:
         let newFilePath = URL(fileURLWithPath: input[1])
         do {
             guard try newFilePath.checkPromisedItemIsReachable() else {
-                print("Invalid paath \(input[1])")
+                print("Invalid path \(input[1])")
                 return
             }
         } catch {

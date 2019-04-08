@@ -25,6 +25,7 @@ class Assembler {
         ".Integer",
         ".String"]
     func assemble(_ assembly:String) throws -> [Int] {
+        var start:Int? = nil
         var result : [Int] = []
         let byLine = assembly.components(separatedBy: "\n").map({$0.components(separatedBy: " ")})
         for lineNum in 0..<byLine.count {
@@ -38,6 +39,7 @@ class Assembler {
                 thisLine.remove(at: 0)
             }
             if let command = commands[thisLine[0]] {
+                if start == nil {start = result.count}
                 result.append(command.bin)
                 do {
                     switch command.argType {
@@ -63,9 +65,7 @@ class Assembler {
             } else {
                 switch thisLine[0] {
                 case directives[0]:
-                    print("intDirective")
                     if let lInt = Int(thisLine[1].dropFirst()) {
-                        print("yeet")
                         result.append(lInt)
                     }
                     continue
@@ -74,7 +74,6 @@ class Assembler {
 "
 """)[1]
                     result.append(string.count)
-                    print(string)
                     for char in string.unicodeScalars {
                             result.append(Int(char.value))
                     }
@@ -83,6 +82,8 @@ class Assembler {
                 }
             }
         }
+        result.insert(result.count, at: 0)
+        result.insert(start!, at: 1)
         return result
     }
     func checkLineForR(_ line:[String],_ argNum: Int, _ lineNum: Int) throws -> Int {

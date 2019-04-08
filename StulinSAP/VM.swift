@@ -10,10 +10,9 @@ import Foundation
 
 class VM {
     var isRunning = false
-    var programCounter = 43
+    var programCounter = 0
     var registers:[Int] = Array(repeating: 0, count: 10)
     var memory:[Int] = []
-    var state:vmState = .program
     var reachDist = 0
     var compReg = 0//0: less than; 1: greater than; 2: equals
     func runCommand(_ command:Int) {
@@ -75,7 +74,6 @@ class VM {
         registers[getPointAfterNum(2)] += registers[getPointAfterNum(1)]
     }
     func getString(_ memLoc: Int) -> String {
-        let stringEnd = memLoc+memory[memLoc]
         return memory[memLoc+1...memLoc+memory[memLoc]].reduce("", {$0 + String(UnicodeScalar($1)!)})
     }
     func movrr() {
@@ -96,18 +94,21 @@ class VM {
         setSleeping()
     }
     func runVM() {
+        let iPC = memory[1]
+        programCounter = iPC
+        memory.remove(at: 1)
+        let iL = memory[0]
+        memory.remove(at: 0)
         while (isRunning) {
             doNext()
         }
+        memory.insert(iPC, at: 0)
+        memory.insert(iL, at: 0)
     }
     func setRunning() {
         isRunning = true
     }
     func setSleeping() {
         isRunning = false
-    }
-    enum vmState {
-        case program
-        case string
     }
 }

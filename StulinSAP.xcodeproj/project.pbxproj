@@ -26,7 +26,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		96BA2C56225ACAE800C58451 /* SAP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAP.swift; sourceTree = "<group>"; };
+		96BA2C56225ACAE800C58451 /* SAP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAP.swift; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 1; };
 		96BA2C58225ACFDB00C58451 /* VM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VM.swift; sourceTree = "<group>"; };
 		96BA2C5A225AE52B00C58451 /* Assembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assembler.swift; sourceTree = "<group>"; };
 		C2FA3E51225533A80001FBE1 /* StulinSAP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StulinSAP; sourceTree = BUILT_PRODUCTS_DIR; };
