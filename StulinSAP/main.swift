@@ -7,7 +7,7 @@
 //
 
 import Foundation
-let ass = Assembler()
+/*let ass = Assembler()
 let assembly = """
 Begin: .Integer #0
 End: .Integer #20
@@ -42,3 +42,6 @@ var vm = VM()
 vm.memory = binbutt
 vm.setRunning()
 vm.runVM()
+*/
+let sap = SAP()
+sap.runUI()
