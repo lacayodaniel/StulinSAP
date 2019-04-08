@@ -66,9 +66,11 @@ SAP Help:
             return
         }
         do {
-            try ass.assemble(fileContents).reduce("", {$0 + String($1) + "\n"}).write(to: URL(fileURLWithPath: input[1] + ".bin", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
+            let assembled = try ass.assemble(fileContents)
+            try assembled.bin.reduce("", {$0 + String($1) + "\n"}).write(to: URL(fileURLWithPath: input[1] + ".bin", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
+            try assembled.lst.write(to: URL(fileURLWithPath: input[1] + ".lst", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
         } catch {
-            print((error as! CompilerError).message)
+            try! "\((error as! CompilerError).message) Line \((error as! CompilerError).line).".write(to: try! URL(fileURLWithPath: input[1] + ".lst", isDirectory: false, relativeTo: filePath), atomically: false, encoding: .ascii)
         }
     }
     func run() {

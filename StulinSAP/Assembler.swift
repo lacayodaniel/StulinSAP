@@ -20,21 +20,25 @@ class Assembler {
         "addir":(12, argType.rr),
         "jmpne":(57, argType.l),
         "addrr":(13, argType.rr),
-        "movrr":(6, argType.rr),]
+        "movrr":(6, argType.rr)]
     let directives = [
         ".Integer",
         ".String"]
-    func assemble(_ assembly:String) throws -> [Int] {
+    func assemble(_ assembly:String) throws -> (bin:[Int], lst:String) {
         var start:Int? = nil
+        var lst:[(lst:String, isLabel:Bool)] = []
         var result : [Int] = []
-        let byLine = assembly.components(separatedBy: "\n").map({$0.components(separatedBy: " ")})
-        for lineNum in 0..<byLine.count {
-            var thisLine = byLine[lineNum]
+        let lines = assembly.components(separatedBy: "\n")
+        symbolTable = [:]
+        for lineNum in 0..<lines.count {
+            lst.append(("\(result.count): ", false))
+            var thisLine = lines[lineNum].components(separatedBy: " ")
             if !commands.keys.contains(thisLine[0]) && !directives.contains(thisLine[0]) {
                 let symbol = String(thisLine[0].dropLast())
                 guard !symbolTable.keys.contains(symbol) else {
                     throw CompilerError("Symbol \(symbol) already exists.", lineNum)
                 }
+                lst[lineNum].isLabel = true
                 addSymbol(symbol, result.count)
                 thisLine.remove(at: 0)
             }
@@ -44,20 +48,30 @@ class Assembler {
                 do {
                     switch command.argType {
                     case .lr:
-                        try result.append(checkLineForL(thisLine, 1, lineNum))
-                        try result.append(checkLineForR(thisLine, 2, lineNum))
-                        continue
+                        let l0 = try checkLineForL(thisLine, 1, lineNum)
+                        result.append(l0)
+                        let r1 = try checkLineForR(thisLine, 2, lineNum)
+                        result.append(r1)
+                        break
                     case .l:
-                        try result.append(checkLineForL(thisLine, 1, lineNum))
-                        continue
+                        let l0 = try checkLineForL(thisLine, 1, lineNum)
+                        result.append(l0)
+                        lst[lineNum].lst += "\(l0) "
+                        break
                     case .r:
-                        try result.append(checkLineForR(thisLine, 1, lineNum))
-                        continue
+                        let r0 = try checkLineForR(thisLine, 1, lineNum)
+                        result.append(r0)
+                        lst[lineNum].lst += "\(r0) "
+                        break
                     case .rr:
-                        try result.append(checkLineForR(thisLine, 1, lineNum))
-                        try result.append(checkLineForR(thisLine, 2, lineNum))
-                        continue
-                    case .none: continue
+                        let r0 = try checkLineForR(thisLine, 1, lineNum)
+                        result.append(r0)
+                        lst[lineNum].lst += "\(r0) "
+                        let r1 = try checkLineForR(thisLine, 2, lineNum)
+                        result.append(r1)
+                        lst[lineNum].lst += "\(r1) "
+                        break
+                    case .none: break
                     }
                 } catch {
                     throw error
@@ -66,25 +80,30 @@ class Assembler {
                 switch thisLine[0] {
                 case directives[0]:
                     if let lInt = Int(thisLine[1].dropFirst()) {
+                        lst[lineNum].lst += "\(lInt) "
                         result.append(lInt)
                     }
-                    continue
+                    break
                 case directives[1]:
                     var string = assembly.components(separatedBy: "\n")[lineNum].components(separatedBy: """
 "
 """)[1]
                     result.append(string.count)
                     for char in string.unicodeScalars {
-                            result.append(Int(char.value))
+                        lst[lineNum].lst += "\(char.value ) "
+                        result.append(Int(char.value))
                     }
-                    continue
-                default: continue
+                    break
+                default: break
                 }
             }
+            lst[lineNum].lst = fitToLeft(15, lst[lineNum].lst) + "     "
+            lst[lineNum].lst += !lst[lineNum].isLabel ? "    " : ""
+            lst[lineNum].lst += lines[lineNum]
         }
         result.insert(result.count, at: 0)
         result.insert(start!, at: 1)
-        return result
+        return (result, lst.reduce("", {$0 + "\($1.lst)\n"}))
     }
     func checkLineForR(_ line:[String],_ argNum: Int, _ lineNum: Int) throws -> Int {
         guard line.indices.contains(argNum) else {
@@ -116,6 +135,19 @@ class Assembler {
         case r
         case rr
         case none
+    }
+    func fitToLeft(_ length: Int, _ str: String) -> String{
+            if str.count > length {
+                return String(str.dropLast(str.count-length))
+            } else if (str.count < length) {
+                var result = str
+                for _ in str.count..<length {
+                    result += " "
+                }
+                return result
+            } else {
+                return str
+            }
     }
 }
 
