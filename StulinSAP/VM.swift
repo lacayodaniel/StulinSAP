@@ -10,7 +10,7 @@ import Foundation
 
 class VM {
     var isRunning = false
-    var programCounter = 0
+    var programCounter = 43
     var registers:[Int] = Array(repeating: 0, count: 10)
     var memory:[Int] = []
     var state:vmState = .program
@@ -36,16 +36,16 @@ class VM {
         incrementCounter()
     }
     func movmr() {
-        registers[getPointAfterNum(1)] = memory[getPointAfterNum(2)]
+        registers[getPointAfterNum(2)] = memory[getPointAfterNum(1)]
     }
     func outs() {
-        print(getString(getPointAfterNum(1)))
+        print(getString(getPointAfterNum(1)), terminator: "")
     }
     func printi() {
-        print(getPointAfterNum(1))
+        print(registers[getPointAfterNum(1)], terminator: "")
     }
     func outcr() {
-        print(registers[getPointAfterNum(1)])
+        print(String(UnicodeScalar(registers[getPointAfterNum(1)])!), terminator: "")
     }
     func cmprr() {
         let reg0 = registers[getPointAfterNum(1)]
@@ -64,7 +64,7 @@ class VM {
     func jmpne() {
         let dest = getPointAfterNum(1)
         if compReg != 2 {
-            jump(dest)
+            jump(dest-1)
         }
     }
     func jump(_ destination: Int) {
@@ -76,14 +76,13 @@ class VM {
     }
     func getString(_ memLoc: Int) -> String {
         let stringEnd = memLoc+memory[memLoc]
-        if programCounter-stringEnd > 0 {reachDist = programCounter-stringEnd}
         return memory[memLoc+1...memLoc+memory[memLoc]].reduce("", {$0 + String(UnicodeScalar($1)!)})
     }
     func movrr() {
         registers[getPointAfterNum(2)] = registers[getPointAfterNum(1)]
     }
     func incrementCounter() {
-        incrementCounter(reachDist)
+        incrementCounter(reachDist + 1)
     }
     func incrementCounter(_ num:Int) {
         programCounter += num
